@@ -38,14 +38,14 @@ h1{
 
   /* Step 2: Shape, spacing, and font sizes */
   padding: 12px 16px; 
-  margin-top: 5vh; 
-  margin-bottom: 5vh;   /*Inside space (top/bottom, left/right) */
+  margin-top: 4%; 
+  margin-bottom: 4vh;   /*Inside space (top/bottom, left/right) */
   font-size: 16px;        /* Keeps mobile browsers from auto-zooming in */
   font-family: inherit;   /* Inherits fonts cleanly from parent page body */
 
   /* Step 3: Color schemes and border edges */
   background-color: #000000; 
-  color: #333333;            /* Text color when a user types */
+  color: #ccc;            /* Text color when a user types */
   border: 2px solid #ccc;    /* Balanced default border line */
   border-radius: 6px;        /* Creates modern, slightly rounded corners */
   
@@ -73,4 +73,20 @@ h1{
   color: #6c757d;
   cursor: not-allowed;       /* Changes pointer indicator */
   border-color: #dee2e6;
+}
+
+.button{
+  border:#ccc solid 2px;
+  border-radius: 10px;
+  color: white;
+  background-color: black;
+  font-size: xx-large;
+  text-align: center;
+  width:30vh;
+}
+
+.button:hover{
+  background-color: white;
+  color:#000000;
+  transition: background-color 0.5s ease;
 }

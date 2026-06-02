@@ -29,13 +29,15 @@
 
     <div class="login">
         <h1>LOGIN</h1>
+        <form action="/login" method="POST">
         <label for="username" style="color: white; font-weight:200; font-size: x-large;">Username</label>
-        <input type="text" id="username" class="custom-input" placeholder="Username">
+        <input type="text" id="username" class="custom-input" placeholder="Username" name="username">
         <br>
         <label for="password" style="color: white; font-weight:200; font-size: x-large;">Password</label>
-        <input type="password" id="password" class="custom-input" placeholder="Passoword">
-        <!-- <input type="text"> -->
-        <!-- <input type="password"> -->
+        <input type="password" id="password" class="custom-input" placeholder="Password" name="password">
+         <br>
+         <button class="button">LOGIN</button>
+         </form>
 
     </div>
 
