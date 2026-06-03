@@ -1,9 +1,14 @@
 from flask import Flask
 from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_user, UserMixin, LoginManager, login_required, logout_user
+from flask_login import login_user, UserMixin, LoginManager, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import sqlalchemy as sa 
+import yfinance as yf
+import pandas as pd
+import time
+from datetime import datetime
+import os
 #.venv\Scripts\activate.bat
 
 class Base(DeclarativeBase):
@@ -24,9 +29,45 @@ class User(db.Model, UserMixin):
     _id: Mapped[int] = mapped_column("id", sa.Integer, primary_key=True)
     username: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    
+    stocks: Mapped[list["Portfolio"]] = db.relationship("Portfolio", backref="owner", lazy=True)
+
 
     def get_id(self):
         return str(self._id)
+
+class Portfolio(db.Model):
+    id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
+    symbol: Mapped[str] = mapped_column(sa.String(10), nullable=False)
+
+    #connects stocks to specfic user id
+    user_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id'),nullable=False)
+
+
+#yfinance funcs
+
+def download_symbol(symbol, user_id):
+    today = datetime.now()
+    start_date = today.replace(year=today.year-1).strftime("%Y-%m-%d")
+    current_date = today.strftime("%Y-%m-%d")
+    
+    # Create a unique folder for this specific user's stock CSVs
+    user_folder = f"./symbols/user_{user_id}"
+    os.makedirs(user_folder, exist_ok=True)
+    
+    # Download data from Yahoo Finance
+    data = yf.download(symbol, start=start_date, end=current_date, multi_level_index=False)
+    
+    if data.empty:
+        return False
+        
+    # Save CSV into the user's isolated folder
+    csv_path = f"{user_folder}/{symbol}.csv"
+    data.to_csv(csv_path, float_format="%.2f")
+    return True
+
+
+#website pages/links
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -79,18 +120,45 @@ def login():
 
     return render_template("login.html")
 
+
+
+#place that shows ur portfolio and stuff about it
+
 @app.route("/dashboard", methods=["POST", "GET"])
 @login_required
 def dashboard():
+    if request.method == "POST":
+        ticker_symbol = request.form.get("ticker").strip().upper()
+
+        already_tracked = db.session.execute(
+            db.select(Portfolio).filter_by(symbol=ticker_symbol, user_id=current_user._id)
+        ).scalar()
+
+        if already_tracked:
+            flash(f"{ticker_symbol} is already in your portfolio!", category='error')
+            return redirect(url_for('dashboard'))
+        
+        print(yf.Ticker(ticker_symbol))
+
+        try:
+
+            download_symbol(ticker_symbol, current_user._id)
+            print("done")
+
+        except:
+            print('error with tickery sysmbol')
     return render_template("dashboard.html")
+
+
+
+
 
 @app.route("/logout")
 @login_required
-
 def logout():
     logout_user()
     print("logged out")
-    return redirect(url_for(home_page))
+    return redirect(url_for('home_page'))
 
 with app.app_context():
     db.create_all()
