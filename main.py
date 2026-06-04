@@ -9,6 +9,7 @@ import pandas as pd
 import time
 from datetime import datetime
 import os
+import json
 #.venv\Scripts\activate.bat
 
 class Base(DeclarativeBase):
@@ -39,6 +40,8 @@ class User(db.Model, UserMixin):
 class Portfolio(db.Model):
     id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
     symbol: Mapped[str] = mapped_column(sa.String(10), nullable=False)
+    # shares: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    # avg_price: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
     #connects stocks to specfic user id
     user_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id'),nullable=False)
@@ -129,25 +132,44 @@ def login():
 def dashboard():
     if request.method == "POST":
         ticker_symbol = request.form.get("ticker").strip().upper()
+        shares = request.form.get("shares")
+        avg_price = request.form.get("avg_price")
+        print(shares, avg_price)
 
         already_tracked = db.session.execute(
             db.select(Portfolio).filter_by(symbol=ticker_symbol, user_id=current_user._id)
         ).scalar()
 
+
+
         if already_tracked:
             flash(f"{ticker_symbol} is already in your portfolio!", category='error')
+            print("already in portfolio!")
             return redirect(url_for('dashboard'))
         
         print(yf.Ticker(ticker_symbol))
 
         try:
-
             download_symbol(ticker_symbol, current_user._id)
-            print("done")
+
+            print("jlkafjdfklajd")
+            if download_symbol:
+                new_stock = Portfolio(symbol=ticker_symbol, user_id=current_user._id)
+                print("done")
+                db.session.add(new_stock)
+                db.session.commit()
+            else:
+                print("error!!!")
 
         except:
             print('error with tickery sysmbol')
-    return render_template("dashboard.html")
+
+        return redirect(url_for("dashboard"))
+
+    user_portfolio = current_user.stocks
+    print(user_portfolio)
+        
+    return render_template("dashboard.html", portfolio=user_portfolio)
 
 
 

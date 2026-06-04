@@ -26,17 +26,27 @@
   </div>
 </nav>
 
-<div class="top">
-  <h1 style="font-size: 12vh; font-weight: bolder;">VISUAL WEALTH MANAGEMENT</h1>
-  <h1 style="font-size:10vh; font-weight: 200;">STOCK PORTFOLIO VISUALIZER</h1>
+<div class="Portfolio">
+  <h1>PORTFOLIO</h1>
+  {% for stock in portfolio %}
+  <li>{{stock.symbol}}</li>
+  {% else %}
+  <li>your not tracking any stocks right now</li>
+  {% endfor %}
 </div>
+
 <div class="info">
     <h1>
-        Enter stock
+        Enter stock: 
     </h1>
     <form action="/dashboard" method="POST">
-        <label for="ticker"></label>
-    <input type="text" class="ticker" name="ticker">
+        <label for="ticker" style="color: white;">Enter stock</label>
+    <input type="text" class="ticker" name="ticker"> <br>
+        <label for="shares" style="color: white;">Add shares</label>
+    <input type="number" class="shares" name="shares">
+    <br>
+    <label for="avg_price" style="color: white;">Add Average Price</label>
+    <input type="number" step="0.01" class="avg_price" name="avg_price">
     <button type="submit">Add Stock</button>
 </form>
 </div>
