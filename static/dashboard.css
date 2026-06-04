@@ -11,14 +11,24 @@ body{
     /* background-size: cover; */
     background-color: rgb(6, 9, 19);
 }
-
+h2{
+    color:white
+}
 h1{
     color: white;
     margin-bottom: 1vh;
     
 }
+dialog{
+    background-color: black;
+    border: 4px white;
+    border-radius: 120px;
+}
 
-h4{
+h3{
+    color: white;
+}
+h5{
     color: white;
 }
 li{
@@ -45,6 +55,7 @@ li{
 
 
 .info{
+    border: 4px white solid;
     padding: 10vh;
     text-align: center;
 }

@@ -40,11 +40,13 @@ class User(db.Model, UserMixin):
 class Portfolio(db.Model):
     id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
     symbol: Mapped[str] = mapped_column(sa.String(10), nullable=False)
-    # shares: Mapped[int] = mapped_column(sa.Integer, nullable=False)
-    # avg_price: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    shares: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+    avg_price: Mapped[float] = mapped_column(sa.Numeric(10,2), nullable=False)
 
     #connects stocks to specfic user id
     user_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id'),nullable=False)
+
+
 
 
 #yfinance funcs
@@ -132,8 +134,8 @@ def login():
 def dashboard():
     if request.method == "POST":
         ticker_symbol = request.form.get("ticker").strip().upper()
-        shares = request.form.get("shares")
-        avg_price = request.form.get("avg_price")
+        shares = int(request.form.get("shares"))
+        avg_price = float(request.form.get("avg_price"))
         print(shares, avg_price)
 
         already_tracked = db.session.execute(
@@ -154,7 +156,7 @@ def dashboard():
 
             print("jlkafjdfklajd")
             if download_symbol:
-                new_stock = Portfolio(symbol=ticker_symbol, user_id=current_user._id)
+                new_stock = Portfolio(symbol=ticker_symbol,shares=shares, avg_price=avg_price ,user_id=current_user._id)
                 print("done")
                 db.session.add(new_stock)
                 db.session.commit()
@@ -169,7 +171,7 @@ def dashboard():
     user_portfolio = current_user.stocks
     print(user_portfolio)
         
-    return render_template("dashboard.html", portfolio=user_portfolio)
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user)
 
 
 

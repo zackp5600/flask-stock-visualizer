@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
 </head>
 <body>
+  <dialog id="dig">
+    <h1>Stock is being added...</h1>
+  </dialog>
 <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
@@ -28,10 +31,13 @@
 
 <div class="Portfolio">
   <h1>PORTFOLIO</h1>
+  <h2>{{user.username.upper()}}'s Account</h2>
   {% for stock in portfolio %}
-  <li>{{stock.symbol}}</li>
+  <h3>Ticker: {{stock.symbol}}</h3>
+  <h5>Shares: {{stock.shares}}</h5>
+  <h5>Average Price: ${{stock.avg_price}}</h5>
   {% else %}
-  <li>your not tracking any stocks right now</li>
+  <h3>Your not tracking any stocks right now</h3>
   {% endfor %}
 </div>
 
@@ -46,9 +52,18 @@
     <input type="number" class="shares" name="shares">
     <br>
     <label for="avg_price" style="color: white;">Add Average Price</label>
-    <input type="number" step="0.01" class="avg_price" name="avg_price">
-    <button type="submit">Add Stock</button>
+    <input type="number" step="0.01" class="avg_price" name="avg_price"><br>
+    <button type="submit" action="popup" id="btn">Add Stock</button>
 </form>
 </div>
+<script>
+  button = document.getElementById("btn");
+  dialog = document.getElementById("dig")
+  button.addEventListener('click', () =>{
+    dialog.showModal();
+  })
+
+
+</script>
 </body>
 </html>
