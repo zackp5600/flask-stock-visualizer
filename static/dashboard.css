@@ -17,7 +17,11 @@ h2{
 h1{
     color: white;
     margin-bottom: 1vh;
-    
+}
+.title{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 400;
+    font-size: 700%;
 }
 dialog{
     background-color: black;
@@ -34,6 +38,55 @@ h5{
 li{
     color: white;
 }
+input{
+  box-sizing: border-box; /* Includes padding and borders in total width */
+  width: 100%;            /* Makes it responsive or fill its container */
+  max-width: 400px;       /* Keeps it from expanding too much */
+
+  /* Step 2: Shape, spacing, and font sizes */
+  padding: 12px 16px; 
+  margin-top: 4vh; 
+  margin-bottom: 4vh;   /*Inside space (top/bottom, left/right) */
+  font-size: 16px;        /* Keeps mobile browsers from auto-zooming in */
+  font-family: inherit;   /* Inherits fonts cleanly from parent page body */
+
+  /* Step 3: Color schemes and border edges */
+  background-color: #000000; 
+  color: #ccc;            /* Text color when a user types */
+  border: 2px solid #ccc;    /* Balanced default border line */
+  border-radius: 6px;        /* Creates modern, slightly rounded corners */
+  
+  /* Step 4: Smooth transitions for state updates */
+  transition: border-color 0.5s ease, box-shadow 0.3s ease;
+}
+input::placeholder{
+    color: #aaa;
+    font-style: italic;
+
+}
+input:focus {
+  border-color: #007bff;     /* Swaps out border color on focus */
+  outline: none;             /* Hides the default blue browser outline */
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25); /* Subtle soft glow ring */
+  background-color: #000000; /* Slightly brightens container inside */
+}
+
+/* Step 7: Handle disabled states gracefully */
+input:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;       /* Changes pointer indicator */
+  border-color: #dee2e6;
+}
+button{
+  border:#ccc solid 2px;
+  border-radius: 10px;
+  color: white;
+  background-color: black;
+  font-size: xx-large;
+  text-align: center;
+  width:30vh;
+}
 
 .custom-nav-logo{
   height: 125px;          /* Make the logo physically larger */
@@ -47,15 +100,15 @@ li{
 
 
 .Portfolio{
-    border: 4px white, solid;
-    border-radius: 120px;
     padding: 10vh;
-    text-align: center;
+    /* text-align: center; */
 }
 
 
 .info{
     border: 4px white solid;
-    padding: 10vh;
+    border-radius: 120px;
+    padding: 4vh;
     text-align: center;
 }
+

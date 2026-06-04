@@ -169,9 +169,12 @@ def dashboard():
         return redirect(url_for("dashboard"))
 
     user_portfolio = current_user.stocks
-    print(user_portfolio)
+    df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
+    labels=df['Date'].tolist()
+    values=df['Close'].tolist()
+    print(df)   
         
-    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user)
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values)
 
 
 

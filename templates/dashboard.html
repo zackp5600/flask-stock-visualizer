@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <title>Home page</title>
     <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
+        <script src="{{ url_for('static', filename='chart.umd.js') }}"></script>
 </head>
 <body>
   <dialog id="dig">
@@ -30,7 +31,7 @@
 </nav>
 
 <div class="Portfolio">
-  <h1>PORTFOLIO</h1>
+  <h1 class="title">PORTFOLIO VISUALIZER</h1>
   <h2>{{user.username.upper()}}'s Account</h2>
   {% for stock in portfolio %}
   <h3>Ticker: {{stock.symbol}}</h3>
@@ -42,28 +43,82 @@
 </div>
 
 <div class="info">
+  <form action="/dashboard" method="POST">
     <h1>
         Enter stock: 
     </h1>
-    <form action="/dashboard" method="POST">
-        <label for="ticker" style="color: white;">Enter stock</label>
-    <input type="text" class="ticker" name="ticker"> <br>
-        <label for="shares" style="color: white;">Add shares</label>
-    <input type="number" class="shares" name="shares">
-    <br>
-    <label for="avg_price" style="color: white;">Add Average Price</label>
-    <input type="number" step="0.01" class="avg_price" name="avg_price"><br>
+
+    <div class="form-row">
+      <label for="ticker" style="color: white;"></label>
+      <input type="text" class="ticker" name="ticker" placeholder="Stock">
+    </div>
+
+    <div class="form-row">
+      <label for="shares" style="color: white;"></label>
+      <input type="number" class="shares" name="shares" placeholder="Shares">
+    </div>
+
+    <div class="form-row">
+      <label for="avg_price" style="color: white;"></label>
+      <input type="number" step="0.01" class="avg_price" name="avg_price" placeholder="Average Price"><br>
+    </div>
+
     <button type="submit" action="popup" id="btn">Add Stock</button>
 </form>
 </div>
+
+<div class="graph" style="position: relative; width: 600px; height: 400px; margin: 40px auto;">
+  <h2 style="color: white; text-align: center;">Stock Alloc</h2>
+  <canvas id="csvChart"></canvas>
+</div>
+
 <script>
-  button = document.getElementById("btn");
-  dialog = document.getElementById("dig")
-  button.addEventListener('click', () =>{
-    dialog.showModal();
-  })
+  document.addEventListener("DOMContentLoaded", function() {
+    const button = document.getElementById("btn");
+    const dialog = document.getElementById("dig");
+    
+    button.addEventListener('click', () => {
+      dialog.showModal();
+    });
 
+    const chartLabels = {{ labels | tojson }};
+    const chartData = {{ values | tojson }};
 
+    const ctx = document.getElementById('csvChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar', 
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Total Value ($)',
+                data: chartData,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#ffffff' } // Whites out the legend text label
+                }
+            },
+            scales: { 
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#ffffff' } // Whites out ticker names
+                },
+                y: { 
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#ffffff' } // Whites out value numbers
+                } 
+            }
+        }
+    });
+  });
 </script>
 </body>
 </html>
