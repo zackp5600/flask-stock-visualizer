@@ -149,7 +149,6 @@ def dashboard():
             print("already in portfolio!")
             return redirect(url_for('dashboard'))
         
-        print(yf.Ticker(ticker_symbol))
 
         try:
             download_symbol(ticker_symbol, current_user._id)
@@ -169,22 +168,34 @@ def dashboard():
         return redirect(url_for("dashboard"))
 
     user_portfolio = current_user.stocks
+
     if user_portfolio: #stocks saved to user
         df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
         labels=df['Date'].tolist()
         values=df['Close'].tolist()
+        values = [0] * len(values) #make values list all zero works
+
         total_alloc = 0
         for stock in current_user.stocks:
             total_alloc+= stock.shares * stock.avg_price
-        print(total_alloc)
         
         #get market value for stocks
         market_value = 0
         for stock in current_user.stocks:
             Ticker = yf.Ticker(stock.symbol)
             current_price = Ticker.info.get("currentPrice")
-            print(stock.symbol, current_price)
             market_value += stock.shares * current_price
+        
+        #get portfolio values
+        for i in range(len(current_user.stocks)):
+            #get specific stock
+            df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[i].symbol}.csv", index_col='Date', parse_dates=True)
+            
+            #get price of stock at certain date and add it to the values
+            for j in range(len(labels)):
+                # print(df.loc[labels[j], 'Close'])
+                spec_price = df.loc[labels[j], 'Close']
+                values[j] += spec_price * current_user.stocks[i].shares
 
 
     else: #stocks not saved to user yet
