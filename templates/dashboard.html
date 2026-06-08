@@ -9,8 +9,8 @@
         <script src="{{ url_for('static', filename='chart.umd.js') }}"></script>
 </head>
 <body>
-  <dialog id="dig">
-    <h1>Stock is being added...</h1>
+  <dialog class="dig" id="dig">
+    <h1 style="font-size: 600%;">Stock is being added...</h1>
   </dialog>
 <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <div class="container-fluid">
@@ -67,10 +67,19 @@
 </form>
 </div>
 
-<div class="graph" style="position: relative; width: 600px; height: 400px; margin: 40px auto;">
-  <h2 style="color: white; text-align: center;">Stock Alloc</h2>
+{% if labels != 0 %}
+<div class="graph" style="position: relative; width: 1200px; height: 600px; margin: 40px auto;">
+  <h1 style="color: white; text-align: center;">Depostited funds: ${{ total_alloc }}</h1>
+  <h1>Market value ${{market_value}}</h1>
   <canvas id="csvChart"></canvas>
 </div>
+
+{% else %}
+<div class="graph-placeholder">
+  <h1>No Stock Price to Show</h1>
+ 
+</div>
+{% endif %}
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -79,22 +88,30 @@
     
     button.addEventListener('click', () => {
       dialog.showModal();
+      // await.delay(1500)
+      
     });
+    
 
-    const chartLabels = {{ labels | tojson }};
+    const chartLabels = {{ labels | tojson }}; //labels and values wont get passed if there is not stocks in portfolio fix this
     const chartData = {{ values | tojson }};
 
+    
     const ctx = document.getElementById('csvChart').getContext('2d');
     new Chart(ctx, {
-        type: 'bar', 
+        type: 'line', 
         data: {
             labels: chartLabels,
             datasets: [{
-                label: 'Total Value ($)',
+                label: 'Price: ',
                 data: chartData,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
+                borderColor: 'rgba(75, 192, 192, 1)',       // Bright teal line
+                backgroundColor: 'rgba(75, 192, 192, 0.1)', // Light teal tint under the line
+                fill: true,                                  // Fills the area beneath the line
+                tension: 0.2,                                // Adds a slight smooth curve to the line
+                pointBackgroundColor: '#ffffff',             // White data dots
+                pointRadius: 0,                              // Dot size
+                pointHoverRadius: 6
             }]
         },
         options: {

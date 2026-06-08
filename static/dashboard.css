@@ -112,3 +112,17 @@ button{
     text-align: center;
 }
 
+.graph{
+    text-align: center;
+}
+
+.graph-placeholder{
+    padding: 10vh;
+    text-align: center;
+}
+
+
+.dig{
+    border: 4px white solid;
+    border-radius: 120px;
+}

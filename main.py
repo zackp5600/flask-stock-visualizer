@@ -169,12 +169,31 @@ def dashboard():
         return redirect(url_for("dashboard"))
 
     user_portfolio = current_user.stocks
-    df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
-    labels=df['Date'].tolist()
-    values=df['Close'].tolist()
-    print(df)   
+    if user_portfolio: #stocks saved to user
+        df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
+        labels=df['Date'].tolist()
+        values=df['Close'].tolist()
+        total_alloc = 0
+        for stock in current_user.stocks:
+            total_alloc+= stock.shares * stock.avg_price
+        print(total_alloc)
         
-    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values)
+        #get market value for stocks
+        market_value = 0
+        for stock in current_user.stocks:
+            Ticker = yf.Ticker(stock.symbol)
+            current_price = Ticker.info.get("currentPrice")
+            print(stock.symbol, current_price)
+            market_value += stock.shares * current_price
+
+
+    else: #stocks not saved to user yet
+        labels=0
+        values=0
+        return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, labels=labels, values=values)
+
+        
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value)
 
 
 
