@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 import os
 import json
+import math
 #.venv\Scripts\activate.bat
 
 class Base(DeclarativeBase):
@@ -61,7 +62,7 @@ def download_symbol(symbol, user_id):
     os.makedirs(user_folder, exist_ok=True)
     
     # Download data from Yahoo Finance
-    data = yf.download(symbol, start=start_date, end=current_date, multi_level_index=False)
+    data = yf.download(symbol, period="1y", multi_level_index=False)
     
     if data.empty:
         return False
@@ -170,33 +171,39 @@ def dashboard():
     user_portfolio = current_user.stocks
 
     if user_portfolio: #stocks saved to user
-        df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
-        labels=df['Date'].tolist()
-        values=df['Close'].tolist()
-        values = [0] * len(values) #make values list all zero works
-
-        total_alloc = 0
-        for stock in current_user.stocks:
-            total_alloc+= stock.shares * stock.avg_price
-        
-        #get market value for stocks
         market_value = 0
-        for stock in current_user.stocks:
-            Ticker = yf.Ticker(stock.symbol)
+        for z in range(len(current_user.stocks)):
+            df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
+            labels=df['Date'].tolist()
+            values=df['Close'].tolist()
+            values = [0] * len(values) #make values list all zero works
+            #this lowk might be why its not working prop
+
+            total_alloc = 0
+            # for stock in current_user.stocks:
+
+            total_alloc+= current_user.stocks[z].shares * current_user.stocks[z].avg_price
+
+
+            #get market value for stocks
+            # for stock in current_user.stocks:
+
+            Ticker = yf.Ticker(current_user.stocks[z].symbol)
             current_price = Ticker.info.get("currentPrice")
-            market_value += stock.shares * current_price
-        
-        #get portfolio values
-        for i in range(len(current_user.stocks)):
-            #get specific stock
-            df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[i].symbol}.csv", index_col='Date', parse_dates=True)
+            market_value += current_user.stocks[z].shares * current_price
+            
+            #get portfolio values
+            # for i in range(len(current_user.stocks)):
+                #get specific stock
+            df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv", index_col='Date', parse_dates=True)
             
             #get price of stock at certain date and add it to the values
             for j in range(len(labels)):
                 # print(df.loc[labels[j], 'Close'])
                 spec_price = df.loc[labels[j], 'Close']
-                values[j] += spec_price * current_user.stocks[i].shares
+                values[j] += spec_price * current_user.stocks[z].shares
 
+        total_alloc = round(total_alloc, 2)
 
     else: #stocks not saved to user yet
         labels=0

@@ -32,14 +32,19 @@
 
 <div class="Portfolio">
   <h1 class="title">PORTFOLIO VISUALIZER</h1>
-  <h2>{{user.username.upper()}}'s Account</h2>
+  <h2 style="font-weight: bold; font-size: 350%;">{{user.username.upper()}}'s Account</h2>
+  <br>
+  <div class="stocks">
   {% for stock in portfolio %}
-  <h3>Ticker: {{stock.symbol}}</h3>
-  <h5>Shares: {{stock.shares}}</h5>
-  <h5>Average Price: ${{stock.avg_price}}</h5>
-  {% else %}
-  <h3>Your not tracking any stocks right now</h3>
-  {% endfor %}
+  <div class="stock">
+    <h3>Ticker: {{stock.symbol}}</h3>
+    <h5>Shares: {{stock.shares}}</h5>
+    <h5>Average Price: ${{stock.avg_price}}</h5>
+  </div>
+    {% else %}
+    <h3 style="font-size: 200%;">Your not tracking any stocks right now!</h3>
+    {% endfor %}
+  </div>
 </div>
 
 <div class="info">

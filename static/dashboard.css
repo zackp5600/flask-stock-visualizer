@@ -126,3 +126,16 @@ button{
     border: 4px white solid;
     border-radius: 120px;
 }
+
+.stocks{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border: 4px white solid;
+    border-radius: 120px;
+    /* height: 50vh; */
+}
+
+.stock{
+    padding: 5vh;
+}
