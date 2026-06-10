@@ -65,6 +65,7 @@ def download_symbol(symbol, user_id):
     data = yf.download(symbol, period="1y", multi_level_index=False)
     
     if data.empty:
+        print("INVALUDDDDFUCKC")
         return False
         
     # Save CSV into the user's isolated folder
@@ -152,15 +153,17 @@ def dashboard():
         
 
         try:
-            download_symbol(ticker_symbol, current_user._id)
+            x = download_symbol(ticker_symbol, current_user._id)
 
-            print("jlkafjdfklajd")
-            if download_symbol:
+            if x:
+                failed = False
                 new_stock = Portfolio(symbol=ticker_symbol,shares=shares, avg_price=avg_price ,user_id=current_user._id)
                 print("done")
                 db.session.add(new_stock)
                 db.session.commit()
             else:
+                failed = True
+                flash("Error: That ticker symbol is invalid!", category='ticker_error')
                 print("error!!!")
 
         except:
@@ -177,7 +180,7 @@ def dashboard():
             labels=df['Date'].tolist()
             values=df['Close'].tolist()
             values = [0] * len(values) #make values list all zero works
-            #this lowk might be why its not working prop
+            
 
             total_alloc = 0
             # for stock in current_user.stocks:
@@ -211,7 +214,7 @@ def dashboard():
         return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, labels=labels, values=values)
 
         
-    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value)
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed)
 
 
 

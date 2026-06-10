@@ -32,6 +32,22 @@
 
 <div class="Portfolio">
   <h1 class="title">PORTFOLIO VISUALIZER</h1>
+{% with messages = get_flashed_messages(category_filter=["ticker_error"]) %}
+  {% if messages %}
+    <script>
+      // This runs automatically as soon as the dashboard page finishes reloading
+      window.onload = function() {
+        {% for message in messages %}
+          // Standard browser alert pop-up box
+          alert("⚠️ {{ message }}");
+          
+          // OR: If you prefer to call your custom showErrorNotification function:
+          // showErrorNotification("{{ message }}");
+        {% endfor %}
+      };
+    </script>
+  {% endif %}
+{% endwith %}
   <h2 style="font-weight: bold; font-size: 350%;">{{user.username.upper()}}'s Account</h2>
   <br>
   <div class="stocks">
