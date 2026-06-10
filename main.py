@@ -134,6 +134,7 @@ def login():
 @app.route("/dashboard", methods=["POST", "GET"])
 @login_required
 def dashboard():
+    failed = False
     if request.method == "POST":
         ticker_symbol = request.form.get("ticker").strip().upper()
         shares = int(request.form.get("shares"))
@@ -156,14 +157,13 @@ def dashboard():
             x = download_symbol(ticker_symbol, current_user._id)
 
             if x:
-                failed = False
                 new_stock = Portfolio(symbol=ticker_symbol,shares=shares, avg_price=avg_price ,user_id=current_user._id)
                 print("done")
                 db.session.add(new_stock)
                 db.session.commit()
             else:
                 failed = True
-                flash("Error: That ticker symbol is invalid!", category='ticker_error')
+                flash(f"Ticker symbol {ticker_symbol} is invalid!", category='ticker_error')
                 print("error!!!")
 
         except:
@@ -191,8 +191,14 @@ def dashboard():
             #get market value for stocks
             # for stock in current_user.stocks:
 
+            #make ts into a functions sooon 
             Ticker = yf.Ticker(current_user.stocks[z].symbol)
-            current_price = Ticker.info.get("currentPrice")
+
+            todays_prices = Ticker.history(period="1d", interval="1m")
+
+
+            current_price = todays_prices['Close'].iloc[-1]
+            print(current_user.stocks[z].symbol)
             market_value += current_user.stocks[z].shares * current_price
             
             #get portfolio values
@@ -203,8 +209,11 @@ def dashboard():
             #get price of stock at certain date and add it to the values
             for j in range(len(labels)):
                 # print(df.loc[labels[j], 'Close'])
+                #somthing is wrong here making the graph show the price for the last stock instead of all the stocks
                 spec_price = df.loc[labels[j], 'Close']
-                values[j] += spec_price * current_user.stocks[z].shares
+                add = spec_price * current_user.stocks[z].shares
+                print(add) 
+                values[j] += add
 
         total_alloc = round(total_alloc, 2)
 
