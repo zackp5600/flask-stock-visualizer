@@ -58,7 +58,7 @@
     <h5>Average Price: ${{stock.avg_price}}</h5>
   </div>
     {% else %}
-    <h3 style="font-size: 200%;">Your not tracking any stocks right now!</h3>
+    <h3 style="font-size: 200%;">You're not tracking any stocks right now!</h3>
     {% endfor %}
   </div>
 </div>
@@ -70,17 +70,14 @@
     </h1>
 
     <div class="form-row">
-      <label for="ticker" style="color: white;"></label>
       <input type="text" class="ticker" name="ticker" placeholder="Stock">
     </div>
 
     <div class="form-row">
-      <label for="shares" style="color: white;"></label>
       <input type="number" class="shares" name="shares" placeholder="Shares">
     </div>
 
     <div class="form-row">
-      <label for="avg_price" style="color: white;"></label>
       <input type="number" step="0.01" class="avg_price" name="avg_price" placeholder="Average Price"><br>
     </div>
 
@@ -103,6 +100,7 @@
 {% endif %}
 
 <script>
+  {% if labels != 0%}
   document.addEventListener("DOMContentLoaded", function() {
     const button = document.getElementById("btn");
     const dialog = document.getElementById("dig");
@@ -157,6 +155,7 @@
         }
     });
   });
+    {% endif %}
 </script>
 </body>
 </html>

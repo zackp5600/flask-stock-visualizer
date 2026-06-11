@@ -52,6 +52,19 @@ class Portfolio(db.Model):
 
 #yfinance funcs
 
+def search(letter):
+    letter.strip()
+    search_query = yf.Search(letter, max_results=3, enable_fuzzy_query=True)
+    results = search_query.quotes
+    message = []
+    for stock in results:
+        symbol = stock.get("symbol")
+        shortname = stock.get("shortname", "Unknown Name")
+        exchange = stock.get("exchange", "Unknown Exchange")
+        message.append(f"{symbol}, {shortname}, {exchange}")
+    return message
+        
+
 def download_symbol(symbol, user_id):
     today = datetime.now()
     start_date = today.replace(year=today.year-1).strftime("%Y-%m-%d")
@@ -139,7 +152,6 @@ def dashboard():
         ticker_symbol = request.form.get("ticker").strip().upper()
         shares = int(request.form.get("shares"))
         avg_price = float(request.form.get("avg_price"))
-        print(shares, avg_price)
 
         already_tracked = db.session.execute(
             db.select(Portfolio).filter_by(symbol=ticker_symbol, user_id=current_user._id)
@@ -175,11 +187,12 @@ def dashboard():
 
     if user_portfolio: #stocks saved to user
         market_value = 0
+        df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
+        values=df['Close'].tolist()
+        values = [0.0] * len(values) #make values list all zero works
         for z in range(len(current_user.stocks)):
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
             labels=df['Date'].tolist()
-            values=df['Close'].tolist()
-            values = [0] * len(values) #make values list all zero works
             
 
             total_alloc = 0
@@ -198,8 +211,8 @@ def dashboard():
 
 
             current_price = todays_prices['Close'].iloc[-1]
-            print(current_user.stocks[z].symbol)
             market_value += current_user.stocks[z].shares * current_price
+            market_value = round(market_value, 2)
             
             #get portfolio values
             # for i in range(len(current_user.stocks)):
@@ -207,13 +220,16 @@ def dashboard():
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv", index_col='Date', parse_dates=True)
             
             #get price of stock at certain date and add it to the values
+            print(current_user.stocks[z].symbol)
+            print("   ")
             for j in range(len(labels)):
-                # print(df.loc[labels[j], 'Close'])
-                #somthing is wrong here making the graph show the price for the last stock instead of all the stocks
-                spec_price = df.loc[labels[j], 'Close']
-                add = spec_price * current_user.stocks[z].shares
-                print(add) 
-                values[j] += add
+                current_date = labels[j]
+                
+                # 2. Check if the date exists in this specific stock's file to prevent KeyError
+                if current_date in df.index:
+                    spec_price = df.loc[current_date, 'Close']
+                    add = spec_price * current_user.stocks[z].shares
+                    values[j] += add
 
         total_alloc = round(total_alloc, 2)
 
