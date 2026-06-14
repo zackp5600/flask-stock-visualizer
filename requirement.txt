@@ -1,4 +1,12 @@
 python
 flask
-sql aclhemy
+flask_login
+flask_sqlalchemy
+sqlalchemy
 yfinance
+pandas
+datetime
+os 
+json
+math
+time

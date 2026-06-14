@@ -70,7 +70,7 @@
     </h1>
 
     <div class="form-row">
-      <input type="text" class="ticker" name="ticker" placeholder="Stock">
+      <input type="text" id="ticker" class="ticker" name="ticker" placeholder="Stock" oninput="">
     </div>
 
     <div class="form-row">
@@ -100,6 +100,7 @@
 {% endif %}
 
 <script>
+
   document.addEventListener("DOMContentLoaded", function() {
     const button = document.getElementById("btn");
     const dialog = document.getElementById("dig");

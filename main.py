@@ -53,16 +53,20 @@ class Portfolio(db.Model):
 #yfinance funcs
 
 def search(letter):
-    letter.strip()
-    search_query = yf.Search(letter, max_results=3, enable_fuzzy_query=True)
-    results = search_query.quotes
-    message = []
-    for stock in results:
-        symbol = stock.get("symbol")
-        shortname = stock.get("shortname", "Unknown Name")
-        exchange = stock.get("exchange", "Unknown Exchange")
-        message.append(f"{symbol}, {shortname}, {exchange}")
-    return message
+    if letter:
+        letter.strip().upper()
+        search_query = yf.Search(letter, max_results=3, enable_fuzzy_query=True)
+        results = search_query.quotes
+        message = []
+        for stock in results:
+            symbol = stock.get("symbol")
+            shortname = stock.get("shortname", "Unknown Name")
+            exchange = stock.get("exchange", "Unknown Exchange")
+            message.append(f"{symbol}, {shortname}, {exchange}")
+        return message
+    else:
+        print("none")
+        pass
         
 
 def download_symbol(symbol, user_id):
@@ -78,7 +82,6 @@ def download_symbol(symbol, user_id):
     data = yf.download(symbol, period="1y", multi_level_index=False)
     
     if data.empty:
-        print("INVALUDDDDFUCKC")
         return False
         
     # Save CSV into the user's isolated folder
@@ -148,6 +151,12 @@ def login():
 @login_required
 def dashboard():
     failed = False
+
+    #search function here
+    letter = request.form.get("ticker")
+    print(search(letter))
+
+
     if request.method == "POST":
         ticker_symbol = request.form.get("ticker").strip().upper()
         shares = int(request.form.get("shares"))
@@ -157,13 +166,10 @@ def dashboard():
             db.select(Portfolio).filter_by(symbol=ticker_symbol, user_id=current_user._id)
         ).scalar()
 
-
-
         if already_tracked:
             flash(f"{ticker_symbol} is already in your portfolio!", category='error')
             print("already in portfolio!")
-            return redirect(url_for('dashboard'))
-        
+            return redirect(url_for('dashboard'))   
 
         try:
             x = download_symbol(ticker_symbol, current_user._id)
@@ -176,11 +182,9 @@ def dashboard():
             else:
                 failed = True
                 flash(f"Ticker symbol {ticker_symbol} is invalid!", category='ticker_error')
-                print("error!!!")
 
         except:
             print('error with tickery sysmbol')
-
         return redirect(url_for("dashboard"))
 
     user_portfolio = current_user.stocks
@@ -197,21 +201,13 @@ def dashboard():
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
             labels=df['Date'].tolist()
             
-
             # for stock in current_user.stocks:
-
             total_alloc+= current_user.stocks[z].shares * current_user.stocks[z].avg_price
-
-
-            #get market value for stocks
+             #get market value for stocks
             # for stock in current_user.stocks:
-
             #make ts into a functions sooon 
             Ticker = yf.Ticker(current_user.stocks[z].symbol)
-
             todays_prices = Ticker.history(period="1d", interval="1m")
-
-
             current_price = todays_prices['Close'].iloc[-1]
             market_value += current_user.stocks[z].shares * current_price
             market_value = round(market_value, 2)
@@ -220,27 +216,23 @@ def dashboard():
             # for i in range(len(current_user.stocks)):
                 #get specific stock
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv", index_col='Date', parse_dates=True)
-            
             #get price of stock at certain date and add it to the values
             print(current_user.stocks[z].symbol)
             print("   ")
             for j in range(len(labels)):
-                current_date = labels[j]
-                
+                current_date = labels[j] 
                 # 2. Check if the date exists in this specific stock's file to prevent KeyError
                 if current_date in df.index:
                     spec_price = df.loc[current_date, 'Close']
                     add = spec_price * current_user.stocks[z].shares
                     values[j] += add
-
         total_alloc = round(total_alloc, 2)
 
     else: #stocks not saved to user yet
         labels=0
         values=0
         return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, labels=labels, values=values)
-
-        
+    
     return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed)
 
 @app.route("/logout")
