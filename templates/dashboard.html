@@ -100,18 +100,18 @@
 {% endif %}
 
 <script>
-  {% if labels != 0%}
   document.addEventListener("DOMContentLoaded", function() {
     const button = document.getElementById("btn");
     const dialog = document.getElementById("dig");
     
     button.addEventListener('click', () => {
       dialog.showModal();
-      // await.delay(1500)
       
     });
+  });
     
 
+  {% if labels != 0%}
     const chartLabels = {{ labels | tojson }}; //labels and values wont get passed if there is not stocks in portfolio fix this
     const chartData = {{ values | tojson }};
 
@@ -154,7 +154,6 @@
             }
         }
     });
-  });
     {% endif %}
 </script>
 </body>

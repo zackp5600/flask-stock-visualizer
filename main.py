@@ -190,12 +190,14 @@ def dashboard():
         df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
         values=df['Close'].tolist()
         values = [0.0] * len(values) #make values list all zero works
+
+        total_alloc = 0
+        #something is borken here
         for z in range(len(current_user.stocks)):
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
             labels=df['Date'].tolist()
             
 
-            total_alloc = 0
             # for stock in current_user.stocks:
 
             total_alloc+= current_user.stocks[z].shares * current_user.stocks[z].avg_price
@@ -240,10 +242,6 @@ def dashboard():
 
         
     return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed)
-
-
-
-
 
 @app.route("/logout")
 @login_required
