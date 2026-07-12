@@ -50,24 +50,7 @@ class Portfolio(db.Model):
 
 
 
-#yfinance funcs
-
-def search(letter):
-    if letter:
-        letter.strip().upper()
-        search_query = yf.Search(letter, max_results=3, enable_fuzzy_query=True)
-        results = search_query.quotes
-        message = []
-        for stock in results:
-            symbol = stock.get("symbol")
-            shortname = stock.get("shortname", "Unknown Name")
-            exchange = stock.get("exchange", "Unknown Exchange")
-            message.append(f"{symbol}, {shortname}, {exchange}")
-        return message
-    else:
-        print("none")
-        pass
-        
+#yfinance funcs     
 
 def download_symbol(symbol, user_id):
     today = datetime.now()
@@ -119,7 +102,6 @@ def signup():
         db.session.commit()
         
         flash('Account created!', category='success')
-        print('accnt created')
         return redirect(url_for('login'))
 
 
@@ -151,11 +133,6 @@ def login():
 @login_required
 def dashboard():
     failed = False
-
-    #search function here
-    letter = request.form.get("ticker")
-    print(search(letter))
-
 
     if request.method == "POST":
         ticker_symbol = request.form.get("ticker").strip().upper()
@@ -196,7 +173,6 @@ def dashboard():
         values = [0.0] * len(values) #make values list all zero works
 
         total_alloc = 0
-        #something is borken here
         for z in range(len(current_user.stocks)):
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
             labels=df['Date'].tolist()
@@ -217,8 +193,6 @@ def dashboard():
                 #get specific stock
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv", index_col='Date', parse_dates=True)
             #get price of stock at certain date and add it to the values
-            print(current_user.stocks[z].symbol)
-            print("   ")
             for j in range(len(labels)):
                 current_date = labels[j] 
                 # 2. Check if the date exists in this specific stock's file to prevent KeyError
