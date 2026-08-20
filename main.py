@@ -139,61 +139,64 @@ def dashboard():
         shares = int(request.form.get("shares"))
         avg_price = float(request.form.get("avg_price"))
 
+        #checks if stock ticker is in db for the user
         already_tracked = db.session.execute(
             db.select(Portfolio).filter_by(symbol=ticker_symbol, user_id=current_user._id)
         ).scalar()
 
-        if already_tracked:
+        if already_tracked: # if the stock is already saved in the users portfolio tell the user
             flash(f"{ticker_symbol} is already in your portfolio!", category='error')
             print("already in portfolio!")
             return redirect(url_for('dashboard'))   
 
-        try:
-            x = download_symbol(ticker_symbol, current_user._id)
+        try: # if the stock is not already saved in the users portfolio then download it
 
-            if x:
+            x = download_symbol(ticker_symbol, current_user._id) # x downloads the ticker while also returning if there was any errors with the ticker symbol
+
+            if x:  
                 new_stock = Portfolio(symbol=ticker_symbol,shares=shares, avg_price=avg_price ,user_id=current_user._id)
                 print("done")
-                db.session.add(new_stock)
+                db.session.add(new_stock) # add the stock to the db
                 db.session.commit()
-            else:
+                
+            else: # failed to download the stock, probably becuase it was invalid ticker
                 failed = True
                 flash(f"Ticker symbol {ticker_symbol} is invalid!", category='ticker_error')
 
         except:
-            print('error with tickery sysmbol')
+            print('error with tickery sysmbol')#idk why i put this here, this only happens if there is an error with the code
+
         return redirect(url_for("dashboard"))
 
-    user_portfolio = current_user.stocks
+    user_portfolio = current_user.stocks #stocks saved to user
 
-    if user_portfolio: #stocks saved to user
+    if user_portfolio: 
         market_value = 0
         df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[0].symbol}.csv")
         values=df['Close'].tolist()
         values = [0.0] * len(values) #make values list all zero works
 
         total_alloc = 0
-        for z in range(len(current_user.stocks)):
+        for z in range(len(current_user.stocks)): #iterate through all stocks in users portfolio from the database
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv")
             labels=df['Date'].tolist()
             
-            # for stock in current_user.stocks:
-            total_alloc+= current_user.stocks[z].shares * current_user.stocks[z].avg_price
-             #get market value for stocks
-            # for stock in current_user.stocks:
+            #get market value for stocks
             #make ts into a functions sooon 
             Ticker = yf.Ticker(current_user.stocks[z].symbol)
+            total_alloc+= current_user.stocks[z].shares * current_user.stocks[z].avg_price
+
             todays_prices = Ticker.history(period="1d", interval="1m")
             current_price = todays_prices['Close'].iloc[-1]
+            
             market_value += current_user.stocks[z].shares * current_price
             market_value = round(market_value, 2)
             
             #get portfolio values
-            # for i in range(len(current_user.stocks)):
-                #get specific stock
+            #get specific stock
             df = pd.read_csv(f"./symbols/user_{current_user._id}/{current_user.stocks[z].symbol}.csv", index_col='Date', parse_dates=True)
             #get price of stock at certain date and add it to the values
-            for j in range(len(labels)):
+            for j in range(len(labels)): #adding values for the graph to show portfolio performance
                 current_date = labels[j] 
                 # 2. Check if the date exists in this specific stock's file to prevent KeyError
                 if current_date in df.index:
@@ -201,13 +204,14 @@ def dashboard():
                     add = spec_price * current_user.stocks[z].shares
                     values[j] += add
         total_alloc = round(total_alloc, 2)
+        percent_gain = total_alloc //  values[-1]
 
     else: #stocks not saved to user yet
         labels=0
         values=0
         return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, labels=labels, values=values)
     
-    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed)
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed, percent_gain=percent_gain)
 
 @app.route("/logout")
 @login_required
