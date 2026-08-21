@@ -1,16 +1,18 @@
-from flask import Flask
-from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_user, UserMixin, LoginManager, login_required, logout_user, current_user
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-import sqlalchemy as sa 
-import yfinance as yf
-import pandas as pd
-import time
-from datetime import datetime
-import os
 import json
 import math
+import os
+import time
+from datetime import datetime
+
+import pandas as pd
+import sqlalchemy as sa
+import yfinance as yf
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import (LoginManager, UserMixin, current_user, login_required,
+                         login_user, logout_user)
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
 #.venv\Scripts\activate.bat
 
 class Base(DeclarativeBase):
@@ -203,15 +205,23 @@ def dashboard():
                     spec_price = df.loc[current_date, 'Close']
                     add = spec_price * current_user.stocks[z].shares
                     values[j] += add
+
+        for i in range(len(values)):
+            
+            low = values[i] #finds the 52 week low for the portfolio 
+            
+        
         total_alloc = round(total_alloc, 2)
-        percent_gain = total_alloc //  values[-1]
+        percent_gain = round( (market_value / float(total_alloc)  - 1) * 100, 2)
+        dollar_gain = round(market_value - float(total_alloc), 2)
+
 
     else: #stocks not saved to user yet
         labels=0
         values=0
         return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, labels=labels, values=values)
     
-    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed, percent_gain=percent_gain)
+    return render_template("dashboard.html", portfolio=user_portfolio, user=current_user, csv=df, labels=labels, values=values,total_alloc=total_alloc, market_value=market_value, failed=failed, percent_gain=percent_gain, dollar_gain=dollar_gain)
 
 @app.route("/logout")
 @login_required
