@@ -90,7 +90,9 @@
   <h1 style="color: white; text-align: center;">Book Value: ${{ total_alloc }}</h1>
   <h1>Market value ${{market_value}}</h1>
   <h1>Percent gain: {{percent_gain}}%    Dollar Gain: ${{dollar_gain}}</h1>
-  <canvas id="csvChart"></canvas>
+  <div class="chart-container" style="position: relative; height: 40vh; width: 63vw;">
+    <canvas id="csvChart"></canvas>
+  </div>
 </div>
 
 {% else %}
@@ -132,8 +134,10 @@
                 tension: 0.2,                                // Adds a slight smooth curve to the line
                 pointBackgroundColor: '#ffffff',             // White data dots
                 pointRadius: 0,                              // Dot size
-                pointHoverRadius: 6
+                pointHoverRadius: 6,
+                spanGaps: true
             }]
+            
         },
         options: {
             responsive: true,

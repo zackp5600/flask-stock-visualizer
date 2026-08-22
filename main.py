@@ -206,9 +206,9 @@ def dashboard():
                     add = spec_price * current_user.stocks[z].shares
                     values[j] += add
 
-        for i in range(len(values)):
+        # for i in range(len(values)):
             
-            low = values[i] #finds the 52 week low for the portfolio 
+        #     low = values[i] #finds the 52 week low for the portfolio 
             
         
         total_alloc = round(total_alloc, 2)

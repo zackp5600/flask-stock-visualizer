@@ -139,3 +139,7 @@ button{
 .stock{
     padding: 5vh;
 }
+
+.chart-container{
+    padding-left: 30vh;
+}
