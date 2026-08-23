@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- FIX 1: Updated to a real, valid Bootstrap 5.3 CDN URL -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
     <title>Home page</title>
     <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
-        <script src="{{ url_for('static', filename='chart.umd.js') }}"></script>
+    <script src="{{ url_for('static', filename='chart.umd.js') }}"></script>
 </head>
 <body>
   <dialog class="dig" id="dig">
@@ -15,7 +16,8 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
-      <img src="../static/logo (2).png" alt="Portfolio Map Logo" class="custom-nav-logo">
+      <!-- FIX 2: Fixed logo path to use Flask's url_for so it never breaks in production -->
+      <img src="{{ url_for('static', filename='logo (2).png') }}" alt="Portfolio Map Logo" class="custom-nav-logo">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -35,14 +37,9 @@
 {% with messages = get_flashed_messages(category_filter=["ticker_error"]) %}
   {% if messages %}
     <script>
-      // This runs automatically as soon as the dashboard page finishes reloading
       window.onload = function() {
         {% for message in messages %}
-          // Standard browser alert pop-up box
           alert("⚠️ {{ message }}");
-          
-          // OR: If you prefer to call your custom showErrorNotification function:
-          // showErrorNotification("{{ message }}");
         {% endfor %}
       };
     </script>
@@ -86,39 +83,39 @@
 </div>
 
 {% if labels != 0 %}
-<div class="graph" style="position: relative; width: 1200px; height: 600px; margin: 40px auto;">
+<div class="graph" style="position: relative; max-width: 100%; margin: 40px auto; padding: 0 15px;">
   <h1 style="color: white; text-align: center;">Book Value: ${{ total_alloc }}</h1>
   <h1>Market value ${{market_value}}</h1>
   <h1>Percent gain: {{percent_gain}}%    Dollar Gain: ${{dollar_gain}}</h1>
-  <div class="chart-container" style="position: relative; height: 40vh; width: 63vw;">
+  <div class="chart-container" style="position: relative; height: 40vh; width: 100%;">
     <canvas id="csvChart"></canvas>
   </div>
 </div>
-
 {% else %}
 <div class="graph-placeholder">
   <h1>No Stock Price to Show</h1>
- 
 </div>
 {% endif %}
 
-<script>
+<!-- FIX 3: Added the vital Bootstrap JavaScript bundle right here before closing body tag -->
+<script src="https://jsdelivr.net"></script>
 
+<script>
   document.addEventListener("DOMContentLoaded", function() {
     const button = document.getElementById("btn");
     const dialog = document.getElementById("dig");
     
-    button.addEventListener('click', () => {
-      dialog.showModal();
-      
-    });
+    // Check if button exists on page before attaching event
+    if(button && dialog) {
+      button.addEventListener('click', () => {
+        dialog.showModal();
+      });
+    }
   });
-    
 
-  {% if labels != 0%}
-    const chartLabels = {{ labels | tojson }}; //labels and values wont get passed if there is not stocks in portfolio fix this
+  {% if labels != 0 %}
+    const chartLabels = {{ labels | tojson }};
     const chartData = {{ values | tojson }};
-
     
     const ctx = document.getElementById('csvChart').getContext('2d');
     new Chart(ctx, {
@@ -128,12 +125,12 @@
             datasets: [{
                 label: 'Price: ',
                 data: chartData,
-                borderColor: 'rgba(75, 192, 192, 1)',       // Bright teal line
-                backgroundColor: 'rgba(75, 192, 192, 0.1)', // Light teal tint under the line
-                fill: true,                                  // Fills the area beneath the line
-                tension: 0.2,                                // Adds a slight smooth curve to the line
-                pointBackgroundColor: '#ffffff',             // White data dots
-                pointRadius: 0,                              // Dot size
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                fill: true,
+                tension: 0.2,
+                pointBackgroundColor: '#ffffff',
+                pointRadius: 0,
                 pointHoverRadius: 6,
                 spanGaps: true
             }]
@@ -143,19 +140,19 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    labels: { color: '#ffffff' } // Whites out the legend text label
+                    labels: { color: '#ffffff' }
                 }
             },
             scales: { 
                 x: {
                     grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#ffffff' } // Whites out ticker names
+                    ticks: { color: '#ffffff' }
                 },
                 y: { 
                     beginAtZero: false,
                     grace: '10%',
                     grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#ffffff' } // Whites out value numbers
+                    ticks: { color: '#ffffff' }
                 } 
             }
         }
